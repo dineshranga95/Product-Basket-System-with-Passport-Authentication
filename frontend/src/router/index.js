@@ -1,0 +1,103 @@
+import Vue from 'vue'
+import VueRouter from 'vue-router'
+import Home from '../views/Home.vue'
+import store from '../store'
+
+Vue.use(VueRouter)
+
+const routes = [
+  {
+    path: '/',
+    name: 'Home',
+    component: Home,
+    meta:{
+      requiresAuth:false
+    }
+  },
+  {
+    path: '/about',
+    name: 'About',   
+    component: () => import('../views/About.vue'),
+    meta:{
+      requiresAuth:false
+    }
+  },
+  {
+    path: '/login',
+    name: 'Login',   
+    component: () => import('../views/Login.vue'),
+    meta:{
+      visitor:true
+    }
+  },
+  {
+    path: '/register',
+    name: 'Register',   
+    component: () => import('../views/Register.vue'),
+    meta:{
+      requiresAuth:false
+    }
+  },
+  {
+    path: '/logOut',
+    name: 'LogOut',   
+    component: () => import('../views/LogOut.vue'),
+    meta:{
+      requiresAuth:true
+    }
+  },
+  {
+    path: '/add',
+    name: 'Add',   
+    component: () => import('../views/AddProduct.vue'),
+    meta:{
+      requiresAuth:true
+    }
+  },
+  {
+    path: '/list',
+    name: 'List',   
+    component: () => import('../views/ProductBasket.vue'),
+    meta:{
+      requiresAuth:true
+    }
+  },
+  {
+    path: '/edit/:id',
+    name: 'edit',   
+    component: () => import('../views/Edit.vue'),
+    meta:{
+      requiresAuth:true
+    }
+  },
+]
+
+const router = new VueRouter({
+  mode: 'history',
+  base: process.env.BASE_URL,
+  routes
+})
+router.beforeEach((to, from, next) => {
+  if (to.matched.some(record => record.meta.requiresAuth)) {   
+    if (!store.getters.loggedIn) {
+      next({
+        path: '/login',
+      })
+    } else {
+      next()
+    }
+  } else if (to.matched.some(record => record.meta.visitor)) {   
+    if (
+      store.getters.loggedIn) {
+      next({
+        path: '/',
+      })
+    } else {
+      next()
+    }
+  } 
+  else {
+    next()
+  }
+})
+export default router
